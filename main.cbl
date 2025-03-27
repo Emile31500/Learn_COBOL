@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.  HELLO-WORLD. 
+       PROGRAM-ID.  MAIN. 
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -10,22 +10,17 @@
        01  WS-MENSUALITE       PIC 9(8) VALUE ZEROS. 
        01  WS-TEMP-INT         PIC 9(8) VALUE ZEROS.
        01  WS-TEMP-FLOAT         PIC 9(8)V99 VALUE ZEROS.
-
        01  WS-MENU-CHOICE      PIC 9(1) VALUE ZEROS. 
        01  WS-FORMATED-INT     PIC ZZ,ZZZ,ZZZ VALUE ZEROS. 
        01  WS-FORMATED-FLOAT   PIC ZZ,ZZZ,ZZZ.99 VALUE ZEROS.
-
-
-
+       01 WS-LIST-INDEX    PIC 9(2) VALUE 1.
        01  TABLEAU.
-           05 WS-LIST-INDEX    PIC 9(2) VALUE 1.
-           05 WS-LIST-APPARTEMENT occurs 64.
-               10  WS-CARAC-APPARTEMENT occurs 4.
+           05 WS-LIST-APPARTEMENT OCCURS 64.
+               10  WS-CARAC-APPARTEMENT OCCURS 4.
                    15 FILLER   PIC 9(8) VALUE ZEROS.
                    15 FILLER   PIC 9(8) VALUE ZEROS.
                    15 FILLER   PIC 9(1)V99 VALUE ZEROS.
                    15 FILLER   PIC 9(8) VALUE ZEROS.
-
 
 
        PROCEDURE DIVISION.
@@ -49,6 +44,10 @@
            END-MENU-CHOICE. 
 
            START-AJOUT-APPARTEMENT.
+
+               CALL 'FindFirstFreeIndex' USING 
+                   TABLEAU, 
+                   WS-LIST-INDEX.
 
                DISPLAY "Entrez le prix de votre appartement : ".
                ACCEPT WS-PRIX.
@@ -84,7 +83,9 @@
            MOVE 1 TO WS-LIST-INDEX.
            PERFORM UNTIL WS-CARAC-APPARTEMENT(WS-LIST-INDEX, 1) = ZEROS
 
-               DISPLAY "Appartement n° " WS-TEMP-INT " :"
+               MOVE WS-LIST-INDEX TO WS-TEMP-INT
+               MOVE WS-TEMP-INT TO WS-FORMATED-INT
+               DISPLAY "Appartement n° " WS-FORMATED-INT " :"
            
                MOVE WS-CARAC-APPARTEMENT(WS-LIST-INDEX, 1)
                    TO WS-TEMP-INT
@@ -106,3 +107,27 @@
            END-AFFICHER-APPARTEMENT.
 
            STOP RUN.
+
+       END PROGRAM MAIN.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  FindFirstFreeIndex. 
+       
+       DATA DIVISION.
+       LINKAGE SECTION.
+       
+       01  TABLEAU.
+           05 WS-LIST-APPARTEMENT OCCURS 64.
+               10  WS-CARAC-APPARTEMENT OCCURS 4.
+                   15 FILLER   PIC 9(8) VALUE ZEROS.
+                   15 FILLER   PIC 9(8) VALUE ZEROS.
+                   15 FILLER   PIC 9(1)V99 VALUE ZEROS.
+                   15 FILLER   PIC 9(8) VALUE ZEROS.
+       01  WS-LIST-INDEX    PIC 9(2) VALUE 1.
+
+       PROCEDURE DIVISION USING TABLEAU, WS-LIST-INDEX.
+           PERFORM UNTIL WS-CARAC-APPARTEMENT(WS-LIST-INDEX, 1) = ZERO
+              ADD 1 TO WS-LIST-INDEX
+           END-PERFORM
+           EXIT PROGRAM.
+       END PROGRAM FindFirstFreeIndex.
